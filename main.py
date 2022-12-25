@@ -6,7 +6,7 @@ class Scalar_Poly_Expanser:
         self.number_joint_RV=number_joint_RV#(iid RV) number of parameters model to evaluate accepts 
         self.poly_order=poly_order
         self.quadrature_intg_order=quadrature_intg_order
-        self.normal_dist=cp.Normal(0,1)
+        self.normal_dist=cp.Uniform(0,1)
         self.iid_normal_dist=cp.Iid(self.normal_dist,self.number_joint_RV)
 
     def generate_quad_nodes_weights(self,tolerance=1e-5,recurrence_algorithm="stieltjes",scaling=5):
@@ -22,7 +22,7 @@ class Scalar_Poly_Expanser:
 
 if __name__=="__main__":
     number_joint_RV=3
-    poly_order=1
+    poly_order=5
     quadrature_intg_order=5
     tolerance=1e10-5
     quadrature_algo="stieltjes"
