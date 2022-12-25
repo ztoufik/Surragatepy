@@ -22,7 +22,7 @@ class Scalar_Poly_Expanser:
 
 if __name__=="__main__":
     number_joint_RV=3
-    poly_order=5
+    poly_order=1
     quadrature_intg_order=5
     tolerance=1e10-5
     quadrature_algo="stieltjes"
@@ -33,15 +33,24 @@ if __name__=="__main__":
     models["linear"]=lambda arr:0.34*arr[0]
     models["delay1"]=lambda arr:arr[1]
     models["delay2"]=lambda arr:arr[2]
+    models["delay2*delay1"]=lambda arr:arr[2]*arr[1]
+    models["exp(delay2+delay1)"]=lambda arr:np.exp(arr[2]+arr[1])
+
     poly_expanser=Scalar_Poly_Expanser(number_joint_RV,poly_order,quadrature_intg_order)
     print("generate nodes & weights")
     poly_expanser.generate_quad_nodes_weights(tolerance,quadrature_algo,scaling)
     print("generate poly expansion")
     poly_expanser.generate_poly_expansion()
+
+    evaluation_nodes=np.random.rand(10,number_joint_RV)
     error={}
     for model in models.keys():
         poly_expanser.estimate_fourier_coefs(models[model])
-        error_vector=(poly_expanser.model_evals-poly_expanser.poly_evals.T.dot(poly_expanser.fourier_coefs))/poly_expanser.model_evals
+        poly_model_evals=poly_expanser.poly_expansion(*evaluation_nodes.T)
+        #print("poly model:",poly_model_evals)
+        model_evals=np.array([models[model](node) for node in evaluation_nodes])
+        #print("model_evals:",model_evals)
+        error_vector=(model_evals-poly_model_evals)/model_evals
         error[model]=np.mean(np.abs(error_vector)).round(3)
 
     for model in error:
