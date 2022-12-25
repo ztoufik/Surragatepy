@@ -6,15 +6,14 @@ class Scalar_Poly_Expanser:
         self.number_joint_RV=number_joint_RV#(iid RV) number of parameters model to evaluate accepts 
         self.poly_order=poly_order
         self.quadrature_intg_order=quadrature_intg_order
-        self.normal_dist=cp.Uniform(0,1)
-        self.iid_normal_dist=cp.Iid(self.normal_dist,self.number_joint_RV)
+        self.iid_joint_dist=cp.Iid(cp.Uniform(0,1),self.number_joint_RV)
 
-    def generate_quad_nodes_weights(self,tolerance=1e-5,recurrence_algorithm="stieltjes",scaling=5):
-        self.nodes,self.weights=cp.generate_quadrature(self.quadrature_intg_order, self.iid_normal_dist, rule="gaussian",
-                                         recurrence_algorithm=recurrence_algorithm ,tolerance=tolerance,scaling=scaling)
+    def generate_quad_nodes_weights(self):
+        self.nodes,self.weights=cp.generate_quadrature(self.quadrature_intg_order, self.iid_joint_dist, rule="gaussian",
+                                         recurrence_algorithm="stieltjes" ,tolerance=1e10-5,scaling=5)
 
     def generate_poly_expansion(self):
-        self.expansions = cp.generate_expansion(self.poly_order, self.iid_normal_dist,normed=True,reverse=True)
+        self.expansions = cp.generate_expansion(self.poly_order, self.iid_joint_dist,normed=True,reverse=True)
 
     def estimate_fourier_coefs(self,model):
         self.model_evals=np.array([model(node) for node in self.nodes.T])
@@ -24,9 +23,6 @@ if __name__=="__main__":
     number_joint_RV=3
     poly_order=5
     quadrature_intg_order=5
-    tolerance=1e10-5
-    quadrature_algo="stieltjes"
-    scaling=5
 
     models={}
     models["tanh"]=lambda arr:np.tanh(arr[0])
@@ -38,7 +34,7 @@ if __name__=="__main__":
 
     poly_expanser=Scalar_Poly_Expanser(number_joint_RV,poly_order,quadrature_intg_order)
     print("generate nodes & weights")
-    poly_expanser.generate_quad_nodes_weights(tolerance,quadrature_algo,scaling)
+    poly_expanser.generate_quad_nodes_weights()
     print("generate poly expansion")
     poly_expanser.generate_poly_expansion()
 
