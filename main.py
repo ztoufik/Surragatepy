@@ -25,8 +25,8 @@ if __name__=="__main__":
         model_evals=models[model].batch_evaluate(poly_expanser.nodes)
         poly_expanser.estimate_fourier_coefs(model_evals)
 
-        poly_model_evals=poly_expanser.poly_expansion(*evaluation_nodes)
-        model_evals=models[model].batch_evaluate(evaluation_nodes)
+        poly_model_evals=poly_expanser.evaluate(evaluation_nodes)
+        model_evals=models[model].batch_evaluate(evaluation_nodes,False)
 
         error_vector=(model_evals-poly_model_evals)/model_evals
         error[model]=np.mean(np.abs(error_vector)).round(3)

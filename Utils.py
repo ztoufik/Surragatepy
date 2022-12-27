@@ -24,11 +24,11 @@ class FModel(ABC):
         pass
 
     @abstractmethod
-    def evaluate(self,arr:ArrayLike)->ArrayLike:
+    def evaluate(self,arr:ArrayLike,cache_enable=True)->ArrayLike:
         ...
 
     @abstractmethod
-    def batch_evaluate(self,arr_of_arrs:ArrayLike)->ArrayLike:
+    def batch_evaluate(self,arr_of_arrs:ArrayLike,cache_enable=True)->ArrayLike:
         ...
 
     def save_data(self,file_cache:str,arr:ArrayLike)->None:

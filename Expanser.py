@@ -32,4 +32,4 @@ class Scalar_Poly_Expanser:
         self.poly_expansion,self.fourier_coefs,self.poly_evals=cp.fit_quadrature(
                 self.expansions, self.nodes, self.weights, model_evals,retall=2)
     def evaluate(self,evaluation_nodes):
-        return self.poly_expansion(evaluation_nodes)
+        return self.poly_expansion(*evaluation_nodes)
