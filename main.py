@@ -33,36 +33,34 @@ class Scalar_Poly_Expanser:
         self.poly_expansion,self.fourier_coefs,self.poly_evals=cp.fit_quadrature(
                 self.expansions, self.nodes, self.weights, model_evals,retall=2)
     def evaluate(self,evaluation_nodes):
-        return self.poly_expansion(*evaluation_nodes.T)
+        return self.poly_expansion(evaluation_nodes)
 
 if __name__=="__main__":
+    from Models import *
+
     number_joint_RV=3
-    poly_order=5
+    poly_order=3
     quadrature_intg_order=5
 
     models={}
-    models["tanh"]=lambda arr:np.tanh(arr[0])
-    models["linear"]=lambda arr:0.34*arr[0]
-    models["delay1"]=lambda arr:arr[1]
-    models["delay2"]=lambda arr:arr[2]
-    models["delay2*delay1"]=lambda arr:arr[2]*arr[1]
-    models["exp(delay2+delay1)"]=lambda arr:np.exp(arr[2]+arr[1])
+    models["linear"]=No_DelayLinear_FModel()
+    models["tanh"]=NoDelay_Tanh_FModel()
+    models["Q2*Q1"]=Q2mulQ1_FModel()
+    models["exp(Q1+Q2)"]=ExpQ2AddQ1_FModel()
 
     poly_expanser=Scalar_Poly_Expanser(number_joint_RV,poly_order,quadrature_intg_order)
-    print("generate nodes & weights")
     poly_expanser.generate_quad_nodes_weights()
-    print("generate poly expansion")
     poly_expanser.generate_poly_expansion()
 
-    evaluation_nodes=np.random.rand(10,number_joint_RV)
+    evaluation_nodes=np.random.rand(number_joint_RV,10)
     error={}
     for model in models.keys():
-        model_evals=[models[model](node) for node in poly_expanser.nodes.T]
-        poly_expanser.estimate_fourier_coefs(np.array(model_evals))
-        poly_model_evals=poly_expanser.evaluate(evaluation_nodes)
-        #print("poly model:",poly_model_evals)
-        model_evals=np.array([models[model](node) for node in evaluation_nodes])
-        #print("model_evals:",model_evals)
+        model_evals=models[model].batch_evaluate(poly_expanser.nodes)
+        poly_expanser.estimate_fourier_coefs(model_evals)
+
+        poly_model_evals=poly_expanser.poly_expansion(*evaluation_nodes)
+        model_evals=models[model].batch_evaluate(evaluation_nodes)
+
         error_vector=(model_evals-poly_model_evals)/model_evals
         error[model]=np.mean(np.abs(error_vector)).round(3)
 
