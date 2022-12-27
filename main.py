@@ -32,6 +32,8 @@ class Scalar_Poly_Expanser:
     def estimate_fourier_coefs(self,model_evals):
         self.poly_expansion,self.fourier_coefs,self.poly_evals=cp.fit_quadrature(
                 self.expansions, self.nodes, self.weights, model_evals,retall=2)
+    def evaluate(self,evaluation_nodes):
+        return self.poly_expansion(*evaluation_nodes.T)
 
 if __name__=="__main__":
     number_joint_RV=3
@@ -57,7 +59,7 @@ if __name__=="__main__":
     for model in models.keys():
         model_evals=[models[model](node) for node in poly_expanser.nodes.T]
         poly_expanser.estimate_fourier_coefs(np.array(model_evals))
-        poly_model_evals=poly_expanser.poly_expansion(*evaluation_nodes.T)
+        poly_model_evals=poly_expanser.evaluate(evaluation_nodes)
         #print("poly model:",poly_model_evals)
         model_evals=np.array([models[model](node) for node in evaluation_nodes])
         #print("model_evals:",model_evals)
