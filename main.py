@@ -6,7 +6,7 @@ if __name__=="__main__":
     from Models import *
 
     number_joint_RV=3
-    poly_order=3
+    poly_order=4
     quadrature_intg_order=5
 
     models={}
@@ -22,11 +22,11 @@ if __name__=="__main__":
     evaluation_nodes=np.random.rand(number_joint_RV,100)
     error={}
     for model in models.keys():
-        model_evals=models[model].batch_evaluate(poly_expanser.nodes)
+        model_evals=models[model].evaluate(poly_expanser.nodes)
         poly_expanser.estimate_fourier_coefs(model_evals)
 
         poly_model_evals=poly_expanser.evaluate(evaluation_nodes)
-        model_evals=models[model].batch_evaluate(evaluation_nodes,False)
+        model_evals=models[model].evaluate(evaluation_nodes,False)
 
         error_vector=(model_evals-poly_model_evals)/model_evals
         error[model]=np.mean(np.abs(error_vector)).round(3)
