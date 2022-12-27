@@ -20,9 +20,15 @@ def hash_numpy_arr(arr):
 
 
 class FModel(ABC):
+    '''
+    __call__: to be defined by custom child class
+    '''
 
     def evaluate(self,arr:ArrayLike)->ArrayLike:
-        file_cache=f"{type(self).__name__}{hash_numpy_arr(arr)}.npy"
+        self.cache_dir=os.path.join('.','cache_dir')
+        if not os.path.exists(self.cache_dir):
+            os.makedirs(self.cache_dir)
+        file_cache=os.path.join(self.cache_dir,f"{type(self).__name__}{hash_numpy_arr(arr)}.npy")
         if os.path.exists(file_cache):
             return self.load_data(file_cache)
         out=self(arr)

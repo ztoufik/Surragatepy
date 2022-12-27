@@ -19,10 +19,15 @@ class Scalar_Poly_Expanser:
         self.poly_ord=poly_ord
         self.quad_int_ord=quad_int_ord
         self.joint_dist=cp.Iid(cp.Uniform(0,1),self.num_RV)# (Remove the serialized cache if you changed dist (Hash don't change if you change the distribution)
+
         self.nodes_hash=hash((self.quad_int_ord,self.num_RV))
         self.expansions_hash=hash((self.poly_ord,self.num_RV))
-        self.nodes_file_name=f"nodes{self.nodes_hash}.pi"
-        self.expansions_file_name=f"expansions{self.expansions_hash}.pi"
+
+        self.cache_dir=os.path.join('.','cache_dir')
+        if not os.path.exists(self.cache_dir):
+            os.makedirs(self.cache_dir)
+        self.nodes_file_name=os.path.join(self.cache_dir,f"nodes{self.nodes_hash}.pi")
+        self.expansions_file_name=os.path.join(self.cache_dir,f"expansions{self.expansions_hash}.pi")
 
     def generate_quad_nodes_weights(self):
         if os.path.exists(self.nodes_file_name):
