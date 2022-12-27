@@ -21,15 +21,13 @@ def hash_numpy_arr(arr):
 
 class FModel(ABC):
 
-    def evaluate(self,arr:ArrayLike,cache_enable=True)->ArrayLike:
-        if cache_enable:
-            file_cache=f"{type(self).__name__}{hash_numpy_arr(arr)}.npy"
-            if os.path.exists(file_cache):
-                return self.load_data(file_cache)
-            out=self(arr)
-            self.save_data(file_cache,out)
-            return out
-        return self(arr)
+    def evaluate(self,arr:ArrayLike)->ArrayLike:
+        file_cache=f"{type(self).__name__}{hash_numpy_arr(arr)}.npy"
+        if os.path.exists(file_cache):
+            return self.load_data(file_cache)
+        out=self(arr)
+        self.save_data(file_cache,out)
+        return out
 
 
     def save_data(self,file_cache:str,arr:ArrayLike)->None:
