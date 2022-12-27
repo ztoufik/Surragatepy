@@ -7,7 +7,7 @@ if __name__=="__main__":
 
     number_joint_RV=2
     poly_order=4
-    quadrature_intg_order=5
+    quadrature_intg_order=10
 
     models={}
     models["linear"]=No_DelayLinear_FModel()
@@ -27,7 +27,6 @@ if __name__=="__main__":
         poly_expanser.estimate_fourier_coefs(model_evals)
 
         poly_model_evals=poly_expanser.evaluate(evaluation_nodes)
-        #model_evals=models[model](evaluation_nodes)
         model_evals=models[model](evaluation_nodes)
 
         error_vector=(model_evals-poly_model_evals)/model_evals
