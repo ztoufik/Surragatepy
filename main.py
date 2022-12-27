@@ -19,7 +19,7 @@ if __name__=="__main__":
     poly_expanser.generate_quad_nodes_weights()
     poly_expanser.generate_poly_expansion()
 
-    evaluation_nodes=np.random.rand(number_joint_RV,10)
+    evaluation_nodes=np.random.rand(number_joint_RV,100)
     error={}
     for model in models.keys():
         model_evals=models[model].batch_evaluate(poly_expanser.nodes)
