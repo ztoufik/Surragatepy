@@ -1,7 +1,7 @@
 import hashlib,os
 import numpy as np
 import pickle as pk
-from abc import ABC
+from abc import ABC,abstractmethod
 from numpy.typing import ArrayLike
 
 def load_data(file_name:str)->tuple:
@@ -18,11 +18,14 @@ def save_data(file_name:str,inputs:object)->None:
 def hash_numpy_arr(arr):
      return hashlib.blake2b(arr.tobytes(), digest_size=20).hexdigest()
 
-
 class FModel(ABC):
     '''
     __call__: to be defined by custom child class
     '''
+
+    @abstractmethod
+    def __call__(self,arr:ArrayLike)->ArrayLike:
+        ...
 
     def evaluate(self,arr:ArrayLike)->ArrayLike:
         self.cache_dir=os.path.join('.','cache_dir')

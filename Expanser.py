@@ -31,6 +31,9 @@ class Expanser:
         self.expansions_file_name=os.path.join(self.cache_dir,f"expansions{self.expansions_hash}.pi")
 
     def generate_quad_nodes_weights(self):
+        '''
+        generate num_RVxlen(weights) matrix of nodes to be evaluated by target model
+        '''
         if os.path.exists(self.nodes_file_name):
             self.nodes,self.weights=utils.load_data(self.nodes_file_name)
         else:
@@ -48,7 +51,7 @@ class Expanser:
     def estimate_fourier_coefs(self,model_evals):
         '''
         also estimate polynomial expansion on self.nodes
-        model_evals:numpy.array of shape 1Xlen(weights)=the output of Model applied to self.nodes
+        model_evals:numpy.array of shape mXlen(weights)=the output of Model applied to self.nodes
         '''
         if len(model_evals.shape)>2:
             raise ValueError(f"expected shape of arg: (m,n). got {model_evals.shape}")
