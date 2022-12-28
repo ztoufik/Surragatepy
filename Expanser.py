@@ -69,7 +69,9 @@ class Expanser:
         self.poly_evals_arrs=np.array(poly_evals_arrs)
 
     def evaluate(self,evaluation_nodes):
-        raise NotImplementedError()
+        return np.array(
+                [poly(*evaluation_nodes)for poly in self.expansions_arrs]
+                )
 
     def calculate_IPC(self):
         ipc={}
