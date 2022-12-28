@@ -1,8 +1,9 @@
 import os
 import chaospy as cp
+import numpy as np
 import Utils as utils
 
-class Scalar_Poly_Expanser:
+class Expanser:
     '''
     Esitmate the polynomial expansion & the fourier coefficient of model using quadrature integration technique
     The input is assumed to be follow IID joint uniform [0,1] pdf
@@ -37,24 +38,41 @@ class Scalar_Poly_Expanser:
                                                             recurrence_algorithm="stieltjes" ,tolerance=1e10-5,scaling=5)
              utils.save_data(self.nodes_file_name,(self.nodes,self.weights))
 
-    def generate_poly_expansion(self):
+    def generate_polynomials(self):
         if os.path.exists(self.expansions_file_name):
-            self.expansions=utils.load_data(self.expansions_file_name)
+            self.polynomials=utils.load_data(self.expansions_file_name)
         else:
-             self.expansions = cp.generate_expansion(self.poly_ord, self.joint_dist,normed=True,reverse=True)
-             utils.save_data(self.expansions_file_name,self.expansions)
+             self.polynomials = cp.generate_expansion(self.poly_ord, self.joint_dist,normed=True,reverse=True)
+             utils.save_data(self.expansions_file_name,self.polynomials)
 
     def estimate_fourier_coefs(self,model_evals):
         '''
         also estimate polynomial expansion on self.nodes
         model_evals:numpy.array of shape 1Xlen(weights)=the output of Model applied to self.nodes
         '''
-        self.poly_expansion,self.fourier_coefs,self.poly_evals=cp.fit_quadrature(
-                self.expansions, self.nodes, self.weights, model_evals,retall=2)
+        if len(model_evals.shape)>2:
+            raise ValueError(f"expected shape of arg: (m,n). got {model_evals.shape}")
+
+        if len(model_evals.shape)==1:#scalar model:
+            model_evals=np.array([model_evals])#vector model with one entry
+
+
+        fourier_coefs_arrs=[0]*model_evals.shape[0]
+        expansions_arrs=[0]*model_evals.shape[0]
+        poly_evals_arrs=[0]*model_evals.shape[0]
+
+        for index,model in enumerate(model_evals):
+            expansions_arrs[index],fourier_coefs_arrs[index],poly_evals_arrs[index]=cp.fit_quadrature(
+                    self.polynomials, self.nodes, self.weights, model,retall=2)
+        self.fourier_coefs_arrs=np.array(fourier_coefs_arrs)
+        self.expansions_arrs=cp.polynomial(expansions_arrs)
+        self.poly_evals_arrs=np.array(poly_evals_arrs)
 
     def evaluate(self,evaluation_nodes):
-        '''
-        evaluation_nodes:numpy.array of shape number_RVxL
-        return:nump.array of shape 1xL the value of polynomial estimation on each colon of RVs
-        '''
-        return self.poly_expansion(*evaluation_nodes)
+        raise NotImplementedError()
+
+    def calculate_IPC(self):
+        ipc={}
+        for poly,arr in zip(self.polynomials,self.fourier_coefs_arrs.T):
+            ipc[str(poly)]=arr*arr
+        return ipc
