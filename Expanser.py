@@ -10,6 +10,7 @@ class Expanser:
     nodes & weights used in estimating the fourier coefficient are generated based on quadrature integration
     file based caching is used where file are named using hashed dependent variables
     '''
+    ROUND_ERROR=4
     def __init__(self, num_RV:int,poly_ord:int,quad_int_ord:int):
         '''
         num_RV:number of iid RV
@@ -40,10 +41,12 @@ class Expanser:
              self.nodes,self.weights=cp.generate_quadrature(self.quad_int_ord, self.joint_dist, rule="gaussian",
                                                             recurrence_algorithm="stieltjes" ,tolerance=1e10-5,scaling=5)
              utils.save_data(self.nodes_file_name,(self.nodes,self.weights))
+        self.nodes=self.nodes.round(Expanser.ROUND_ERROR)
+        self.weights=self.weights.round(Expanser.ROUND_ERROR)
 
     def generate_polynomials(self):
         if os.path.exists(self.expansions_file_name):
-            self.polynomials=utils.load_data(self.expansions_file_name)
+            self.polynomials=utils.load_data(self.expansions_file_name).round(Expanser.ROUND_ERROR)
         else:
              self.polynomials = cp.generate_expansion(self.poly_ord, self.joint_dist,normed=True,reverse=True)
              utils.save_data(self.expansions_file_name,self.polynomials)
