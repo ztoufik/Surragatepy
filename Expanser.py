@@ -20,7 +20,7 @@ class Expanser:
         self.num_RV=num_RV
         self.poly_ord=poly_ord
         self.quad_int_ord=quad_int_ord
-        self.joint_dist=cp.Iid(cp.Uniform(0,1),self.num_RV)# (Remove the serialized cache if you changed dist (Hash don't change if you change the distribution)
+        self.joint_dist=cp.Iid(cp.Uniform(-2,2),self.num_RV)# (Remove the serialized cache if you changed dist (Hash don't change if you change the distribution)
 
         self.nodes_hash=hash((self.quad_int_ord,self.num_RV))
         self.expansions_hash=hash((self.poly_ord,self.num_RV))
@@ -48,6 +48,6 @@ class Expanser:
         if os.path.exists(self.expansions_file_name):
             self.polynomials=utils.load_data(self.expansions_file_name).round(Expanser.ROUND_ERROR)
         else:
-             self.polynomials = cp.generate_expansion(self.poly_ord, self.joint_dist,normed=True,reverse=True)
+             self.polynomials = cp.generate_expansion(self.poly_ord, self.joint_dist,normed=True,reverse=False)
              utils.save_data(self.expansions_file_name,self.polynomials)
 

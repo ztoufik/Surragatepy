@@ -15,7 +15,8 @@ class Surrogate_Model(Expanser):
         '''
         self.generate_quad_nodes_weights()
 
-        model_evals=self.Model.evaluate(self.nodes).round(Expanser.ROUND_ERROR)
+        #model_evals=self.Model.evaluate(self.nodes).round(Expanser.ROUND_ERROR)
+        model_evals=self.Model(self.nodes).round(Expanser.ROUND_ERROR)
         if len(model_evals.shape)>2:
             raise ValueError(f"expected shape of arg: (m,n). got {model_evals.shape}")
 
@@ -42,12 +43,13 @@ class Surrogate_Model(Expanser):
 
     def get_error(self,evaluation_nodes):
         poly_model_evals=self.evaluate(evaluation_nodes)
-        model_evals=self.Model.evaluate(evaluation_nodes)
-        error_vector=(model_evals-poly_model_evals)/model_evals
+        model_evals=self.Model(evaluation_nodes)
+        error_vector=1-(model_evals/poly_model_evals)
         return np.array([np.mean(np.abs(err_row)) for err_row in error_vector]).round(3)
 
     def calculate_IPC(self):
         self.ipc={}
         for poly,arr in zip(self.polynomials,self.fourier_coefs_arrs.T):
-            self.ipc[str(poly)]=(arr*arr).round(Expanser.ROUND_ERROR)
+            #self.ipc[str(poly)]=(arr*arr).round(Expanser.ROUND_ERROR)
+            self.ipc[str(poly)]=(arr*arr).round(3)
         return self.ipc

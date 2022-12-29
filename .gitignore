@@ -351,3 +351,5 @@ override.tf.json
 # example: *tfplan*
 
 # End of https://www.gitignore.io/api/pydev,flask,django,python,terraform,pycharm+all,jupyternotebooks
+
+cache_dir/
