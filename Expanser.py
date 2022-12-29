@@ -10,7 +10,7 @@ class Expanser:
     nodes & weights used in estimating the fourier coefficient are generated based on quadrature integration
     file based caching is used where file are named using hashed dependent variables
     '''
-    def __init__(self, num_RV,poly_ord,quad_int_ord):
+    def __init__(self, num_RV:int,poly_ord:int,quad_int_ord:int):
         '''
         num_RV:number of iid RV
         poly_ord:maximal order of polynomial expansion
@@ -48,36 +48,3 @@ class Expanser:
              self.polynomials = cp.generate_expansion(self.poly_ord, self.joint_dist,normed=True,reverse=True)
              utils.save_data(self.expansions_file_name,self.polynomials)
 
-    def estimate_fourier_coefs(self,model_evals):
-        '''
-        also estimate polynomial expansion on self.nodes
-        model_evals:numpy.array of shape mXlen(weights)=the output of Model applied to self.nodes
-        '''
-        if len(model_evals.shape)>2:
-            raise ValueError(f"expected shape of arg: (m,n). got {model_evals.shape}")
-
-        if len(model_evals.shape)==1:#scalar model:
-            model_evals=np.array([model_evals])#vector model with one entry
-
-
-        fourier_coefs_arrs=[0]*model_evals.shape[0]
-        expansions_arrs=[0]*model_evals.shape[0]
-        poly_evals_arrs=[0]*model_evals.shape[0]
-
-        for index,model in enumerate(model_evals):
-            expansions_arrs[index],fourier_coefs_arrs[index],poly_evals_arrs[index]=cp.fit_quadrature(
-                    self.polynomials, self.nodes, self.weights, model,retall=2)
-        self.fourier_coefs_arrs=np.array(fourier_coefs_arrs)
-        self.expansions_arrs=cp.polynomial(expansions_arrs)
-        self.poly_evals_arrs=np.array(poly_evals_arrs)
-
-    def evaluate(self,evaluation_nodes):
-        return np.array(
-                [poly(*evaluation_nodes)for poly in self.expansions_arrs]
-                )
-
-    def calculate_IPC(self):
-        ipc={}
-        for poly,arr in zip(self.polynomials,self.fourier_coefs_arrs.T):
-            ipc[str(poly)]=arr*arr
-        return ipc

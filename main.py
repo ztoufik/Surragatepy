@@ -1,4 +1,5 @@
 from Expanser import Expanser
+from Surrogate_Model import Surrogate_Model
 import numpy as np
 from Models import *
 
@@ -7,29 +8,20 @@ poly_order=4
 quadrature_intg_order=10
 
 models={}
-models["linear"]=No_DelayLinear_FModel()
-models["tanh"]=NoDelay_Tanh_FModel()
-models["Q2*Q1"]=Q2mulQ1_FModel()
-models["Q1*Q0"]=Q1mulQ0_FModel()
-models["exp(Q1+Q2)"]=ExpQ2AddQ1_FModel()
-models["Polar_Coord"]=PolarCoord_FModel()
-
-expanser=Expanser(number_joint_RV,poly_order,quadrature_intg_order)
-expanser.generate_quad_nodes_weights()
-expanser.generate_polynomials()
+models["linear"]=Surrogate_Model(No_DelayLinear_FModel(),number_joint_RV,poly_order,quadrature_intg_order)
+models["tanh"]=Surrogate_Model(NoDelay_Tanh_FModel(),number_joint_RV,poly_order,quadrature_intg_order)
+models["Q2*Q1"]=Surrogate_Model(Q2mulQ1_FModel(),number_joint_RV,poly_order,quadrature_intg_order)
+models["Q1*Q0"]=Surrogate_Model(Q1mulQ0_FModel(),number_joint_RV,poly_order,quadrature_intg_order)
+models["exp(Q1+Q2)"]=Surrogate_Model(ExpQ2AddQ1_FModel(),number_joint_RV,poly_order,quadrature_intg_order)
+models["Polar_Coord"]=Surrogate_Model(PolarCoord_FModel(),number_joint_RV,poly_order,quadrature_intg_order)
 
 evaluation_nodes=np.random.rand(number_joint_RV,100)
 error={}
+
 for model in models.keys():
-    model_evals=models[model](expanser.nodes)
-    #model_evals=models[model].evaluate(expanser.nodes)
-    expanser.estimate_fourier_coefs(model_evals)
+    models[model].estimate_fourier_coefs()
+    
+    error[model]=models[model].get_error(evaluation_nodes)
 
-    #poly_model_evals=expanser.evaluate(evaluation_nodes)
-    #model_evals=models[model](evaluation_nodes)
-
-    #error_vector=(model_evals-poly_model_evals)/model_evals
-    #error[model]=np.mean(np.abs(error_vector)).round(3)
-
-#for model in error:
-    #print(model,error[model])
+for model in error:
+    print(model,error[model])
